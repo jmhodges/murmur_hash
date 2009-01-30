@@ -47,6 +47,6 @@ task :package do
 end
 
 task :repackage do
-  sh 'rm murmur_hash*.gem'
+  sh 'rm -f murmur_hash*.gem'
   sh 'gem build murmur_hash.gemspec'
 end
