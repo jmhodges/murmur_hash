@@ -256,34 +256,43 @@ unsigned int MurmurHashNeutral2 ( const void * key, int len, unsigned int seed )
 
 VALUE MurmurHashModule = Qnil;
 
-VALUE method_murmur_hash(VALUE self, VALUE key, VALUE seed) {
+VALUE call_murmur_func
+(unsigned int (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
-  unsigned int hash_value = MurmurHash2(key_string, key_length, seedling);
-  printf("Welp, %u\n", hash_value);
+  
+  unsigned int hash_value = func(key_string, key_length, seedling);
+  
   return UINT2NUM(hash_value);
+}
+
+VALUE method_murmur_hash(VALUE self, VALUE key, VALUE seed) {
+  return call_murmur_func(MurmurHash2, key, seed);
 }
 
 VALUE method_aligned_murmur_hash(VALUE self, VALUE key, VALUE seed) {
-  int key_length = RSTRING(key)->len;
-  char *key_string = RSTRING(key)->ptr;
-  unsigned int seedling = FIX2UINT(seed);
-  unsigned int hash_value = MurmurHashAligned2(key_string, key_length, seedling);
-  return UINT2NUM(hash_value);
+  return call_murmur_func(MurmurHashAligned2, key, seed);
 }
 
 VALUE method_neutral_murmur_hash(VALUE self, VALUE key, VALUE seed) {
-  int key_length = RSTRING(key)->len;
-  char *key_string = RSTRING(key)->ptr;
-  unsigned int seedling = FIX2UINT(seed);
-  unsigned int hash_value = MurmurHashNeutral2(key_string, key_length, seedling);
-  return UINT2NUM(hash_value);
+  return call_murmur_func(MurmurHashNeutral2, key, seed);
 }
 
 extern "C" void Init_murmur_hash() {
   MurmurHashModule = rb_define_module("MurmurHash");
-  rb_define_module_function(MurmurHashModule, "murmur_hash", (VALUE(*)(...))&method_murmur_hash, 2);
-  rb_define_module_function(MurmurHashModule, "aligned_murmur_hash", (VALUE(*)(...))&method_aligned_murmur_hash, 2);
-  rb_define_module_function(MurmurHashModule, "neutral_murmur_hash", (VALUE(*)(...))&method_neutral_murmur_hash, 2);
+
+  rb_define_module_function(MurmurHashModule,
+                            "murmur_hash",
+                            (VALUE(*)(...))&method_murmur_hash,
+                            2);
+  
+  rb_define_module_function(MurmurHashModule,
+                            "aligned_murmur_hash",
+                            (VALUE(*)(...))&method_aligned_murmur_hash,
+                            2);
+  rb_define_module_function(MurmurHashModule,
+                            "neutral_murmur_hash",
+                            (VALUE(*)(...))&method_neutral_murmur_hash,
+                            2);
 }
