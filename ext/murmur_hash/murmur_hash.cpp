@@ -261,7 +261,8 @@ VALUE method_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
   unsigned int hash_value = MurmurHash2(key_string, key_length, seedling);
-  return INT2NUM(hash_value);
+  printf("Welp, %u\n", hash_value);
+  return UINT2NUM(hash_value);
 }
 
 VALUE method_aligned_murmur_hash(VALUE self, VALUE key, VALUE seed) {
@@ -269,7 +270,7 @@ VALUE method_aligned_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
   unsigned int hash_value = MurmurHashAligned2(key_string, key_length, seedling);
-  return INT2NUM(hash_value);
+  return UINT2NUM(hash_value);
 }
 
 VALUE method_neutral_murmur_hash(VALUE self, VALUE key, VALUE seed) {
@@ -277,7 +278,7 @@ VALUE method_neutral_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
   unsigned int hash_value = MurmurHashNeutral2(key_string, key_length, seedling);
-  return INT2NUM(hash_value);
+  return UINT2NUM(hash_value);
 }
 
 extern "C" void Init_murmur_hash() {
