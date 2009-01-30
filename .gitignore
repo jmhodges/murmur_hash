@@ -6,3 +6,4 @@ TAGS
 *.bundle
 *.log
 *.o
+Makefile
