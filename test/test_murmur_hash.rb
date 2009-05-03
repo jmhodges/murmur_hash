@@ -1,5 +1,5 @@
 require "test/unit"
-require "murmur_hash"
+require File.expand_path(File.dirname(__FILE__) + "/../lib/murmur_hash")
 
 
 # I'm sure there's a simpler way to do this, but I can't remember it
@@ -53,5 +53,19 @@ class TestMurmurHash < Test::Unit::TestCase
     assert_equal(answer, MurmurHash.murmur_hash64("string", 23),
                  "64-bit murmur_hash returns #{answer} on a #{Endian.endianness}-endian box, which this box is"
                  )
+  end
+
+  def test_all_hash_methods_raise_error_if_key_is_not_a_string
+    assert_raises(TypeError) { MurmurHash.murmur_hash([], 23) }
+    assert_raises(TypeError) { MurmurHash.neutral_murmur_hash([], 23) }
+    assert_raises(TypeError) { MurmurHash.aligned_murmur_hash([], 23) }
+    assert_raises(TypeError) { MurmurHash.murmur_hash64([], 23) }
+  end
+
+  def test_all_hash_methods_raise_error_if_seed_is_not_a_fixnum
+    assert_raises(TypeError) { MurmurHash.murmur_hash("fa", []) }
+    assert_raises(TypeError) { MurmurHash.neutral_murmur_hash("fa", "fff") }
+    assert_raises(TypeError) { MurmurHash.aligned_murmur_hash("fa", 23.0) }
+    assert_raises(TypeError) { MurmurHash.murmur_hash64("fa", "faf") }
   end
 end

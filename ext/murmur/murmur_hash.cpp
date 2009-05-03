@@ -364,6 +364,8 @@ VALUE MurmurHashModule = Qnil;
 
 VALUE call_murmur_func
 (unsigned int (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
+  SafeStringValue(key);
+  Check_Type(seed, T_FIXNUM);
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
@@ -373,8 +375,11 @@ VALUE call_murmur_func
   return UINT2NUM(hash_value);
 }
 
+
 VALUE call_murmur64_func
 (uint64_t (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
+  SafeStringValue(key);
+  Check_Type(seed, T_FIXNUM);
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
