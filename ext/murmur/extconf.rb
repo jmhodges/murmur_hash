@@ -1,6 +1,6 @@
 require 'mkmf'
 
-dir_config("murmur_hash")
+dir_config("murmur")
 have_library("c", "main")
 
-create_makefile("murmur_hash")
+create_makefile("murmur")
