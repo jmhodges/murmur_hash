@@ -4,7 +4,17 @@ require 'rake'
 
 def define_rake_stuff
   require 'hoe'
-  require './lib/murmur_hash.rb'
+  begin
+    require './lib/murmur_hash.rb'
+
+  rescue LoadError => e
+    murmur_bundle = File.expand_path(File.dirname(__FILE__) + '/lib/murmur')
+    if (e.message =~ /#{murmur_bundle}(\.bundle)?$/)
+      STDERR.puts "Looks like you have not run a successful `rake compile`, yet. Do that next!"
+    else
+      raise e
+    end
+  end
   Rake::ExtensionTask.new('murmur')
   define_hoe_tasks
 end
@@ -20,6 +30,9 @@ def define_hoe_tasks
     p.developer('Jeff Hodges', 'jeff@somethingsimilar.com')
     p.extra_deps = ['rake-compiler', 'nokogiri']
   end
+  
+  Rake::Task[:test].prerequisites << :compile
+
 end
 
 begin
@@ -43,6 +56,8 @@ def conditionally_install_gem(name, version_requirements)
   end
 end
 
+task :default => :compile
+
 # Taken liberally from http://blog.labnotes.org/2008/02/28/svn-checkout-rake-setup/
 desc "If you're building from source, run this task first to setup the necessary dependencies."
 task :setup do
@@ -63,7 +78,7 @@ task :setup do
     conditionally_install_gem(dep.name, dep.version_requirements)
   end
 
-puts "\nAnd done."
+  puts "\nAnd done."
 end
 
 # vim: syntax=Ruby

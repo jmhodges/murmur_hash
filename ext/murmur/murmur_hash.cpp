@@ -279,7 +279,7 @@ VALUE method_neutral_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   return call_murmur_func(MurmurHashNeutral2, key, seed);
 }
 
-extern "C" void Init_murmur_hash() {
+extern "C" void Init_murmur() {
   MurmurHashModule = rb_define_module("MurmurHash");
 
   rb_define_module_function(MurmurHashModule,
