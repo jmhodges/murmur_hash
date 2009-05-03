@@ -379,9 +379,9 @@ VALUE call_murmur64_func
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
 
-  unsigned int hash_value = func(key_string, key_length, seedling);
+  uint64_t hash_value = func(key_string, key_length, seedling);
 
-  return UINT2NUM(hash_value);
+  return ULL2NUM(hash_value);
 }
 
 
