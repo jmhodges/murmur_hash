@@ -29,16 +29,22 @@ end
 
 class TestMurmurHash < Test::Unit::TestCase
   def test_neutral_does_the_right_thing
-    assert_equal 3435905073, MurmurHash.neutral_murmur_hash("string", 23)
+    assert_equal(3435905073, MurmurHash.neutral_murmur_hash("string", 23),
+                 "neutral_murmur_hash returns the same on boxes of both endianesses"
+                 )
   end
 
   def test_normal_does_the_right_thing
     answer = Endian.little? ? 3435905073 : "FIXME find a big-endian box"
-    assert_equal answer, MurmurHash.murmur_hash("string", 23)
+    assert_equal(answer, MurmurHash.murmur_hash("string", 23),
+                 "murmur_hash returns #{answer} on a #{Endian.endianness}-endian box, which this box is"
+                 )
   end
 
   def test_aligned_does_the_right_thing
     answer = Endian.little? ? 3435905073 : "FIXME find a big-endian box"
-    assert_equal answer, MurmurHash.aligned_murmur_hash("string", 23)
+    assert_equal(answer, MurmurHash.aligned_murmur_hash("string", 23),
+                 "aligned_murmur_hash returns #{answer} on a #{Endian.endianness}-endian box, which this box is"
+                 )
   end
 end
