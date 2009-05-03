@@ -1,0 +1,8 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+lib/murmur_hash.rb
+test/test_murmur_hash.rb
+ext/murmur/extconf.rb
+ext/murmur/murmur_hash.cpp
