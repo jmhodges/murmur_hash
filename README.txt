@@ -21,9 +21,18 @@
     function that does only byte-aligned reads. It is slightly safer
     on some uncommon platforms.
 
+* Provides the 64-bit MurmurHash function. When on a 32-bit machine,
+  it will use the backward compatible version.
+
 == SYNOPSIS:
   # 23 can be any unsigned 32-bit integer (i.e. from 0 to 2**32 - 1)
   hash_number = MurmurHash.murmur_hash("somestring", 23) 
+
+  h = MurmurHash.neutral_murmur_hash("s", 23)
+  h = MurmurHash.aligned_murmur_hash("s", 23)
+
+  # 23 still must be a unsigned 32-bit integer
+  h = MurmurHash.murmur_hash64("s", 23)
 
 == REQUIREMENTS:
 
