@@ -12,6 +12,7 @@
 // 2. It will not produce the same results on little-endian and big-endian
 //    machines.
 #include <stdio.h>
+#include <stdint.h>
 #include "ruby.h"
 #include "limits.h"
 
@@ -35,17 +36,17 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
     {
       unsigned int k = *(unsigned int *)data;
 
-      k *= m; 
-      k ^= k >> r; 
-      k *= m; 
-		
-      h *= m; 
+      k *= m;
+      k ^= k >> r;
+      k *= m;
+
+      h *= m;
       h ^= k;
 
       data += 4;
       len -= 4;
     }
-	
+
   // Handle the last few bytes of the input array
 
   switch(len)
@@ -70,7 +71,7 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
 // MurmurHashAligned2, by Austin Appleby
 
 // Same algorithm as MurmurHash2, but only does aligned reads - should be safer
-// on certain platforms. 
+// on certain platforms.
 
 // Performance will be lower than MurmurHash2
 
@@ -228,8 +229,8 @@ unsigned int MurmurHashNeutral2 ( const void * key, int len, unsigned int seed )
       k |= data[2] << 16;
       k |= data[3] << 24;
 
-      k *= m; 
-      k ^= k >> r; 
+      k *= m;
+      k ^= k >> r;
       k *= m;
 
       h *= m;
@@ -238,7 +239,7 @@ unsigned int MurmurHashNeutral2 ( const void * key, int len, unsigned int seed )
       data += 4;
       len -= 4;
     }
-	
+
   switch(len)
     {
     case 3: h ^= data[2] << 16;
@@ -252,7 +253,112 @@ unsigned int MurmurHashNeutral2 ( const void * key, int len, unsigned int seed )
   h ^= h >> 15;
 
   return h;
-} 
+}
+
+//-----------------------------------------------------------------------------
+// MurmurHash2, 64-bit versions, by Austin Appleby
+
+// The same caveats as 32-bit MurmurHash2 apply here - beware of alignment
+// and endian-ness issues if used across multiple platforms.
+
+// 64-bit hash for 64-bit platforms
+
+uint64_t MurmurHash64A ( const void * key, int len, unsigned int seed )
+{
+	const uint64_t m = 0xc6a4a7935bd1e995LL;
+	const int r = 47;
+
+	uint64_t h = seed ^ (len * m);
+
+	const uint64_t * data = (const uint64_t *)key;
+	const uint64_t * end = data + (len/8);
+
+	while(data != end)
+	{
+		uint64_t k = *data++;
+
+		k *= m;
+		k ^= k >> r;
+		k *= m;
+
+		h ^= k;
+		h *= m;
+	}
+
+	const unsigned char * data2 = (const unsigned char*)data;
+
+	switch(len & 7)
+	{
+	case 7: h ^= uint64_t(data2[6]) << 48;
+	case 6: h ^= uint64_t(data2[5]) << 40;
+	case 5: h ^= uint64_t(data2[4]) << 32;
+	case 4: h ^= uint64_t(data2[3]) << 24;
+	case 3: h ^= uint64_t(data2[2]) << 16;
+	case 2: h ^= uint64_t(data2[1]) << 8;
+	case 1: h ^= uint64_t(data2[0]);
+	        h *= m;
+	};
+
+	h ^= h >> r;
+	h *= m;
+	h ^= h >> r;
+
+	return h;
+}
+
+
+// 64-bit hash for 32-bit platforms
+
+uint64_t MurmurHash64B ( const void * key, int len, unsigned int seed )
+{
+	const unsigned int m = 0x5bd1e995;
+	const int r = 24;
+
+	unsigned int h1 = seed ^ len;
+	unsigned int h2 = 0;
+
+	const unsigned int * data = (const unsigned int *)key;
+
+	while(len >= 8)
+	{
+		unsigned int k1 = *data++;
+		k1 *= m; k1 ^= k1 >> r; k1 *= m;
+		h1 *= m; h1 ^= k1;
+		len -= 4;
+
+		unsigned int k2 = *data++;
+		k2 *= m; k2 ^= k2 >> r; k2 *= m;
+		h2 *= m; h2 ^= k2;
+		len -= 4;
+	}
+
+	if(len >= 4)
+	{
+		unsigned int k1 = *data++;
+		k1 *= m; k1 ^= k1 >> r; k1 *= m;
+		h1 *= m; h1 ^= k1;
+		len -= 4;
+	}
+
+	switch(len)
+	{
+	case 3: h2 ^= ((unsigned char*)data)[2] << 16;
+	case 2: h2 ^= ((unsigned char*)data)[1] << 8;
+	case 1: h2 ^= ((unsigned char*)data)[0];
+			h2 *= m;
+	};
+
+	h1 ^= h2 >> 18; h1 *= m;
+	h2 ^= h1 >> 22; h2 *= m;
+	h1 ^= h2 >> 17; h1 *= m;
+	h2 ^= h1 >> 19; h2 *= m;
+
+	uint64_t h = h1;
+
+	h = (h << 32) | h2;
+
+	return h;
+}
 
 VALUE MurmurHashModule = Qnil;
 
@@ -261,11 +367,23 @@ VALUE call_murmur_func
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
   unsigned int seedling = FIX2UINT(seed);
-  
+
   unsigned int hash_value = func(key_string, key_length, seedling);
-  
+
   return UINT2NUM(hash_value);
 }
+
+VALUE call_murmur64_func
+(uint64_t (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
+  int key_length = RSTRING(key)->len;
+  char *key_string = RSTRING(key)->ptr;
+  unsigned int seedling = FIX2UINT(seed);
+
+  unsigned int hash_value = func(key_string, key_length, seedling);
+
+  return UINT2NUM(hash_value);
+}
+
 
 VALUE method_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   return call_murmur_func(MurmurHash2, key, seed);
@@ -279,6 +397,15 @@ VALUE method_neutral_murmur_hash(VALUE self, VALUE key, VALUE seed) {
   return call_murmur_func(MurmurHashNeutral2, key, seed);
 }
 
+VALUE method_murmur_hash64(VALUE self, VALUE key, VALUE seed) {
+#ifdef _LP64
+  /* we're on a 64-bit machine so act like it, punk */
+  return call_murmur64_func(MurmurHash64A, key, seed);
+#else
+  return call_murmur64_func(MurmurHash64B, key, seed);
+#endif
+}
+
 extern "C" void Init_murmur() {
   MurmurHashModule = rb_define_module("MurmurHash");
 
@@ -286,7 +413,7 @@ extern "C" void Init_murmur() {
                             "murmur_hash",
                             (VALUE(*)(...))&method_murmur_hash,
                             2);
-  
+
   rb_define_module_function(MurmurHashModule,
                             "aligned_murmur_hash",
                             (VALUE(*)(...))&method_aligned_murmur_hash,
@@ -294,5 +421,9 @@ extern "C" void Init_murmur() {
   rb_define_module_function(MurmurHashModule,
                             "neutral_murmur_hash",
                             (VALUE(*)(...))&method_neutral_murmur_hash,
+                            2);
+  rb_define_module_function(MurmurHashModule,
+                            "murmur_hash64",
+                            (VALUE(*)(...))&method_murmur_hash64,
                             2);
 }

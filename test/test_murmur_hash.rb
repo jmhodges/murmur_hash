@@ -47,4 +47,11 @@ class TestMurmurHash < Test::Unit::TestCase
                  "aligned_murmur_hash returns #{answer} on a #{Endian.endianness}-endian box, which this box is"
                  )
   end
+
+  def test_64bit_does_the_right_thing
+    answer = Endian.little? ? 2953274510 : "FIXME find a big-endian box"
+    assert_equal(answer, MurmurHash.murmur_hash64("string", 23),
+                 "64-bit murmur_hash returns #{answer} on a #{Endian.endianness}-endian box, which this box is"
+                 )
+  end
 end
