@@ -29,6 +29,7 @@ def define_hoe_tasks
     # p.rubyforge_name = 'murmur_hash' # if different than lowercase project name
     p.developer('Jeff Hodges', 'jeff@somethingsimilar.com')
     p.extra_deps << ['rake-compiler', '~>0.5']
+    p.blog_categories = ['murmur_hash', 'ruby']
   end
   
   Rake::Task[:test].prerequisites << :compile
