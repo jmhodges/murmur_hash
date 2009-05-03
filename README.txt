@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-* A ruby extension for the MurmurHash2 functions. See http://murmurhash.googlepages.com/
+* A ruby extension for the MurmurHash2 functions from http://murmurhash.googlepages.com/
 
 == FEATURES/PROBLEMS:
 
@@ -25,13 +25,14 @@
   it will use the backward compatible version.
 
 == SYNOPSIS:
+
   # 23 can be any unsigned 32-bit integer (i.e. from 0 to 2**32 - 1)
   hash_number = MurmurHash.murmur_hash("somestring", 23) 
 
   h = MurmurHash.neutral_murmur_hash("s", 23)
   h = MurmurHash.aligned_murmur_hash("s", 23)
 
-  # 23 still must be a unsigned 32-bit integer
+  # 23 must still be a unsigned 32-bit integer
   h = MurmurHash.murmur_hash64("s", 23)
 
 == REQUIREMENTS:
