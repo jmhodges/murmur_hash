@@ -28,7 +28,7 @@ def define_hoe_tasks
   Hoe.new('murmur_hash', version) do |p|
     # p.rubyforge_name = 'murmur_hash' # if different than lowercase project name
     p.developer('Jeff Hodges', 'jeff@somethingsimilar.com')
-    p.extra_deps = ['rake-compiler', 'nokogiri']
+    p.extra_deps = ['rake-compiler']
   end
   
   Rake::Task[:test].prerequisites << :compile
