@@ -25,14 +25,14 @@ def define_hoe_tasks
     version = MurmurHash::VERSION
   end
 
-  Hoe.new('murmur_hash', version) do |p|
+  h = Hoe.new('murmur_hash', version) do |p|
     # p.rubyforge_name = 'murmur_hash' # if different than lowercase project name
     p.developer('Jeff Hodges', 'jeff@somethingsimilar.com')
-    p.extra_deps = ['rake-compiler']
+    p.extra_deps << ['rake-compiler', '~>0.5']
   end
   
   Rake::Task[:test].prerequisites << :compile
-
+  h
 end
 
 begin
