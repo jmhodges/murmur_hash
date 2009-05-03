@@ -55,6 +55,13 @@ class TestMurmurHash < Test::Unit::TestCase
                  )
   end
 
+  def test_seeds_can_be_as_big_as_unsigned_32bit_ints_but_no_bigger
+    assert_equal 713507990, MurmurHash.murmur_hash('a', 4294967295), "bumping the seed up to the edge of 2**32 - 1 in 32-bit hashing"
+    assert_raises(RangeError){ MurmurHash.murmur_hash('a', 4294967296) }
+    assert_equal 5672511219810442881, MurmurHash.murmur_hash64('a', 4294967295), "bumping the seed up to the edge of  2**32 - 1 in 64-bit hashing"
+    assert_raises(RangeError){ MurmurHash.murmur_hash64('a', 4294967296) }
+  end
+  
   def test_all_hash_methods_raise_error_if_key_is_not_a_string
     assert_raises(TypeError) { MurmurHash.murmur_hash([], 23) }
     assert_raises(TypeError) { MurmurHash.neutral_murmur_hash([], 23) }

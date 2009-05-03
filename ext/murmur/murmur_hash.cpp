@@ -362,13 +362,21 @@ uint64_t MurmurHash64B ( const void * key, int len, unsigned int seed )
 
 VALUE MurmurHashModule = Qnil;
 
+void murmur_hash_check_seed(VALUE seed) {
+  if (!(TYPE(seed) == T_FIXNUM || TYPE(seed) == T_BIGNUM)) {
+    rb_raise(rb_eTypeError,
+             "seeds for the murmur hash function must be a Fixnum or Bignum");
+
+  }
+}
+
 VALUE call_murmur_func
 (unsigned int (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
   SafeStringValue(key);
-  Check_Type(seed, T_FIXNUM);
+  murmur_hash_check_seed(seed);
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
-  unsigned int seedling = FIX2UINT(seed);
+  unsigned int seedling = NUM2UINT(seed);
 
   unsigned int hash_value = func(key_string, key_length, seedling);
 
@@ -379,10 +387,10 @@ VALUE call_murmur_func
 VALUE call_murmur64_func
 (uint64_t (*func)(const void*, int, unsigned int), VALUE key, VALUE seed) {
   SafeStringValue(key);
-  Check_Type(seed, T_FIXNUM);
+  murmur_hash_check_seed(seed);
   int key_length = RSTRING(key)->len;
   char *key_string = RSTRING(key)->ptr;
-  unsigned int seedling = FIX2UINT(seed);
+  unsigned int seedling = NUM2UINT(seed);
 
   uint64_t hash_value = func(key_string, key_length, seedling);
 
