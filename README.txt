@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-* A ruby extension for the MurmurHash2 functions from http://murmurhash.googlepages.com/
+* A ruby extension for the MurmurHash2 functions from http://murmurhash.googlepages.com
 
 == FEATURES/PROBLEMS:
 
